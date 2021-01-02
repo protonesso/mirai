@@ -1,0 +1,11 @@
+[package]
+name = "mirai"
+version = "0.0.0"
+authors = ["Ishimoto Shinobu <nagakamira@gmail.com>"]
+edition = "2018"
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
