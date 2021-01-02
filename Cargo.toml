@@ -5,7 +5,11 @@ authors = ["Ishimoto Shinobu <nagakamira@gmail.com>"]
 edition = "2018"
 
 [profile.dev]
+lto = true 
+opt-level = 0
 panic = "abort"
 
 [profile.release]
+lto = true 
+opt-level = 0
 panic = "abort"
