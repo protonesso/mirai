@@ -15,6 +15,16 @@
 /* Declare the BSS section */
 .section .bss
 .align 16
+pml4:
+.skip 4096
+pml3:
+.skip 4096
+pml2:
+.skip 4096
+pml1_a:
+.skip 4096
+pml1_b:
+.skip 4096
 stack_bottom:
 .skip 16386 /* Define stack size is 16KB */
 stack_top:
@@ -26,7 +36,36 @@ stack_top:
 .code32
 start:
 	/* Initialize stack */
-	mov $stack_top, %esp
+	movl $stack_top, %esp
+
+	/* Initialize 64-bit PAE */
+	movl %cr4, %eax
+	btsl $(5), %eax
+	movl %eax, %cr4
+
+	/* Load the physical pointer to the top level page table */
+	movl $pml4, %edi
+	movl %edi, %cr3
+
+	/* Page-Map Level 4 */
+	movl $(pml3 + 0x207), pml4 + 0 * 8
+
+	/* Page Directory Pointer Table */
+	movl $(pml2 + 0x207), pml3 + 0 * 8
+
+	/* Page Directory (no user-space access here) */
+	movl $(pml1_a + 0x003), pml2 + 0 * 8
+	movl $(pml1_b + 0x003), pml2 + 1 * 8
+
+	movl $(pml1_a + 8), %edi
+	movl $0x1003, %esi
+	movl $1023, %ecx
+
+	/* Initialize Long Mode */
+	movl $0xc0000080, %ecx
+	rdmsr
+	orl $0x900, %eax
+	wrmsr
 
 	/* Jump in Rust code */
 	call kmain
